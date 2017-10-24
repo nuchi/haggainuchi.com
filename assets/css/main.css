@@ -143,3 +143,35 @@ div.nav a {
   padding: 0.7em;
   text-decoration: none;
 }
+
+.theorem {
+  margin: 1em;
+  padding: 0.5em;
+  border: 1px;
+  border-color: black;
+  border-style: solid;
+}
+
+.theorem > p {
+  margin: 0;
+}
+
+.theorem > p:first-child:before {
+  content: "Theorem: ";
+  font-weight: bold;
+}
+
+.lemma > p:first-child:before {
+  content: "Lemma: ";
+}
+
+.proof > p:first-child:before {
+  content: "Proof: ";
+  font-style: italic;
+}
+
+.proof > p:last-child:after {
+  text-align: right;
+  float: right;
+  content: "□";
+}
