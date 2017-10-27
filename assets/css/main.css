@@ -86,7 +86,7 @@ a:focus {
 
 img {
   vertical-align: middle;
-  width: 100%;
+  max-width: 100%;
 }
 
 pre, code {
