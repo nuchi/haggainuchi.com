@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="author" content="hnuchi">
+  <title>Haggai Nuchi - Nested parentheses in a one-liner</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<div class="nav">
+<ul>
+<li><a href="/">about</a></li>
+<li><a href="/writings.html">writings</a></li>
+<li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
+</ul>
+</div>
+<h1 id="nested-parentheses-in-a-python-one-liner">Nested parentheses in a python one-liner</h1>
+<p>A colleague at my former employer <a href="https://www.getcruise.com">Cruise Automation</a> asked “How do you print all valid strings of n pairs of nested parentheses with a one-liner?”</p>
+<p>“()(())” is valid, because every opening parenthesis is matched by a closing one. “())” is invalid, because the last closing parenthesis is unmatched. Likewise “(())” is valid, “)(” isn’t, and neither is “(()”.</p>
+<p>I’m pretty sure he had a work-related reason for wanting it, which I can’t recall. It surely wasn’t about actually printing nested parentheses, but it was some problem which was functionally identical. The problem of generating (or counting) all strings of balanced parentheses is related to the <a href="https://en.wikipedia.org/wiki/Catalan_number">Catalan numbers</a>, and there are lots of ways for these numbers to pop up; see the “Applications in combinatorics” section of the linked wikipedia article.</p>
+<p>Can we write this one-liner in python?</p>
+<p>After studying the ideas in the wikipedia article linked above, I produce my first attempt:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"> <span class="kw">def</span> nested_parens(n):
+   <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span>:
+     <span class="cf">return</span> [<span class="st">&#39;&#39;</span>]
+   parens <span class="op">=</span> []
+   <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):
+     <span class="cf">for</span> a <span class="kw">in</span> nested_parens(i):
+       <span class="cf">for</span> b <span class="kw">in</span> nested_parens(n <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i):
+         parens.append(<span class="st">&#39;(&#39;</span> <span class="op">+</span> a <span class="op">+</span> <span class="st">&#39;)&#39;</span> <span class="op">+</span> b)
+   <span class="cf">return</span> parens</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> nested_parens(<span class="dv">3</span>)
+[<span class="st">&#39;()()()&#39;</span>, <span class="st">&#39;()(())&#39;</span>, <span class="st">&#39;(())()&#39;</span>, <span class="st">&#39;(()())&#39;</span>, <span class="st">&#39;((()))&#39;</span>]</code></pre></div>
+<p>That’s longer than one line, but one step at a time. First I’ll explain what it’s doing, then we’ll “improve” it so that it matches the specifications. I put that in quotes because optimizing for the values of “one-liner” destroys its value according to many other measures. It’ll be pretty monstrous.</p>
+<h2 id="what-is-it-doing">What is it doing</h2>
+<p>It’s an example of a <a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)">recursive function</a>. The base case when <code>n</code> is zero is tested at the beginning, and for larger values <code>1, 2, 3, ...</code>, the function is defined in terms of smaller values. Note that I didn’t bother to check that the input parameter is sensible — this is meant to be a throwaway one-liner —, but at least <code>range</code> will complain if it gets a bad value so it probably won’t get stuck in an infinite loop.</p>
+<p>The idea is that every string of (for example) three properly nested parentheses looks like one of the following:</p>
+<pre><code>( ~zero nested parens~ ) ~two nested parens~
+( ~one nested paren~ ) ~one nested paren~
+( ~two nested parens~ ) ~zero nested parens~</code></pre>
+<p>The outermost <code>for</code> is looping over each line of the above, and the two inner <code>for</code>s are looping over the two groups of nested parens in each line. Each group of nested parens in each line is a number smaller than 3, and so the function calls itself recursively.</p>
+<h2 id="improve-it-be-more-pythonic">Improve it: be more pythonic</h2>
+<p>Let’s improve it! Our goal is to make it a one-liner. Right now it weighs in at 9 lines, plus one line to call the function. Even if we weren’t trying to make it a one-liner, it’s not idiomatic python as it stands. In python, prefer to use <a href="https://en.wikipedia.org/wiki/List_comprehension">list comprehensions</a> instead of iterating over numeric variables.</p>
+<p>Attempt number two:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> nested_parens(n):
+   <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span>:
+     <span class="cf">return</span> [<span class="st">&#39;&#39;</span>]
+   <span class="cf">return</span> [<span class="st">&#39;(&#39;</span> <span class="op">+</span> a <span class="op">+</span> <span class="st">&#39;)&#39;</span> <span class="op">+</span> b
+           <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n)
+           <span class="cf">for</span> a <span class="kw">in</span> nested_parens(i)
+           <span class="cf">for</span> b <span class="kw">in</span> nested_parens(n <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i)]</code></pre></div>
+<p>Much better! I think this version is easier to read as well as being more idiomatic python.</p>
+<h2 id="philosophical-issues-what-is-a-one-liner">Philosophical issues: what is a one-liner?</h2>
+<p>“Every program is a one-liner, if that line is long enough.” I’ve heard mathematicians make that joke about one-line proofs of theorems, too. Parallel evolution of humor? Or overlapping communities?</p>
+<p>It’s hard to make precise exactly what counts as one line. Is the base case of this function one line or two? It’s written as two lines, with <code>if n == 0:</code> on one line and <code>return ['']</code> on a second… but on the other hand the single line <code>if n == 0: return ['']</code> is perfectly correct, even if the convention is to split it up for readability.</p>
+<p>Regardless, it’s clear that the program as it stands is not one line. Let’s shorten it. At this point we’re abandoning the value of clarity for the questionable value of abhorring new-lines.</p>
+<p>Attempt number three:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="kw">def</span> nested_parens(n):
+  <span class="cf">return</span> [<span class="st">&#39;&#39;</span>] <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> [<span class="st">&#39;(&#39;</span> <span class="op">+</span> a <span class="op">+</span> <span class="st">&#39;)&#39;</span> <span class="op">+</span> b
+                              <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n)
+                              <span class="cf">for</span> a <span class="kw">in</span> nested_parens(i)
+                              <span class="cf">for</span> b <span class="kw">in</span> nested_parens(n <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i)]</code></pre></div>
+<p>Lovely! I left line breaks inside the list comprehension for readability, but you could get rid of those breaks and the program is the same. So are we done?</p>
+<h2 id="anonymous-function-calls">Anonymous function calls</h2>
+<p>I count three lines. One for <code>def nested_parens(n):</code>, a second for the function definition itself (ignoring the line breaks left in for readability), and a third for calling it. For example:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> square(n):
+...   <span class="cf">return</span> n <span class="op">*</span> n
+...
+<span class="op">&gt;&gt;&gt;</span> square(<span class="dv">5</span>)
+<span class="dv">25</span></code></pre></div>
+<p>We had to type three lines. Four if you count the empty line to break out of the function definition. Unacceptable! We can modify this toy example to really truly require only one line:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> (<span class="kw">lambda</span> n: n <span class="op">*</span> n)(<span class="dv">5</span>)
+<span class="dv">25</span></code></pre></div>
+<p>We’ve replaced the function definition of <code>square</code> with an <a href="https://en.wikipedia.org/wiki/Anonymous_function">anonymous function</a> call, or a <code>lambda</code>, and then called that function with the parameter <code>5</code> in the same line.</p>
+<p>So let’s do the same for our nested parentheses function!</p>
+<h2 id="anonymous-recursion">Anonymous recursion</h2>
+<p>Not so fast.</p>
+<p>(Failed) attempt:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> (<span class="kw">lambda</span> n: [<span class="st">&#39;&#39;</span>] <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> [<span class="st">&#39;(&#39;</span> <span class="op">+</span> a <span class="op">+</span> <span class="st">&#39;)&#39;</span> <span class="op">+</span> b
+                                    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n)
+                                    <span class="cf">for</span> a <span class="kw">in</span> nested_parens(i)
+                                    <span class="cf">for</span> b <span class="kw">in</span> nested_parens(n <span class="op">-</span> <span class="dv">1</span> <span class="op">-</span> i)])(<span class="dv">5</span>)
+Traceback (most recent call last):
+  File <span class="st">&quot;&lt;stdin&gt;&quot;</span>, line <span class="dv">4</span>, <span class="kw">in</span> <span class="op">&lt;</span>module<span class="op">&gt;</span>
+  File <span class="st">&quot;&lt;stdin&gt;&quot;</span>, line <span class="dv">3</span>, <span class="kw">in</span> <span class="op">&lt;</span><span class="kw">lambda</span><span class="op">&gt;</span>
+<span class="pp">NameError</span>: <span class="kw">global</span> name <span class="st">&#39;nested_parens&#39;</span> <span class="kw">is</span> <span class="kw">not</span> defined</code></pre></div>
+<p>An anonymous function can’t refer to itself so easily. How could it? It has no name. (Note: if you’re following along in a terminal and the above seemed to work fine with no error, it’s because you have a previously defined working version of <code>nested_parens</code>. Delete that working version with <code>del nested_parens</code> or by simply relaunching python.)</p>
+<p>So how do we implement recursion in an anonymous function? Let’s develop the answer with an easier example of a recursive function, the factorial function:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> factorial(n):
+...  <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span>:
+...    <span class="cf">return</span> <span class="dv">1</span>
+...  <span class="cf">return</span> n <span class="op">*</span> factorial(n <span class="op">-</span> <span class="dv">1</span>)
+...
+<span class="op">&gt;&gt;&gt;</span> factorial(<span class="dv">4</span>)
+<span class="dv">24</span></code></pre></div>
+<p>Our goal is to rewrite this recursive function in such a way that the function doesn’t actually refer to itself by name, so that we can write it as a lambda. In order to do that we have to first make it seem a bit more complicated:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> factorial(n, recursive_fn):
+...   <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span>:
+...     <span class="cf">return</span> <span class="dv">1</span>
+...   <span class="cf">return</span> n <span class="op">*</span> recursive_fn(n <span class="op">-</span> <span class="dv">1</span>, recursive_fn)
+...
+<span class="op">&gt;&gt;&gt;</span> factorial(<span class="dv">4</span>, factorial)
+<span class="dv">24</span></code></pre></div>
+<p>What?! Well, the point is that now the <code>factorial</code> function doesn’t refer to itself by name in its definition. We do that at the cost of introducing an extra parameter: the new definition of <code>factorial</code> says, instead of “call myself recursively”, “call this other function <code>recursive_fn</code> recursively”, and then when we call <code>factorial</code> we pass itself in a parameter.</p>
+<p>So how do we use this?</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> call_fn_on_itself(m, fn):
+...  <span class="cf">return</span> fn(m, fn)
+...
+<span class="op">&gt;&gt;&gt;</span> call_fn_on_itself(<span class="dv">4</span>, factorial)
+<span class="dv">24</span></code></pre></div>
+<p>Now we can write <code>factorial</code> as an anonymous function instead of a named function, and <code>call_fn_on_itself</code> will still work:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> call_fn_on_itself(
+...   <span class="dv">4</span>, <span class="kw">lambda</span> n, recursive_fn: <span class="dv">1</span> <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span>
+...                              n <span class="op">*</span> recursive_fn(n<span class="op">-</span><span class="dv">1</span>, recursive_fn))
+<span class="dv">24</span></code></pre></div>
+<p>We can write <code>call_fn_on_itself</code> anonymously, too:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> (<span class="kw">lambda</span> m, fn: fn(m, fn))(<span class="dv">4</span>, factorial)
+<span class="dv">24</span></code></pre></div>
+<p>And put the two ideas together:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> (<span class="kw">lambda</span> m, fn: fn(m, fn))(<span class="dv">4</span>, <span class="kw">lambda</span> n, recursive_fn : <span class="dv">1</span> <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> n <span class="op">*</span> recursive_fn(n<span class="op">-</span><span class="dv">1</span>, recursive_fn))
+<span class="dv">24</span></code></pre></div>
+<p>And finally, we use the parentheses-generating function instead of factorial:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">&gt;&gt;&gt;</span> (<span class="kw">lambda</span> m, fn: fn(m, fn))(<span class="dv">3</span>, <span class="kw">lambda</span> n, recursive_fn : [<span class="st">&#39;&#39;</span>] <span class="cf">if</span> n <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> [<span class="st">&#39;(&#39;</span><span class="op">+</span>a<span class="op">+</span><span class="st">&#39;)&#39;</span><span class="op">+</span>b <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n) <span class="cf">for</span> a <span class="kw">in</span> recursive_fn(i, recursive_fn) <span class="cf">for</span> b <span class="kw">in</span> recursive_fn(n<span class="op">-</span><span class="dv">1</span><span class="op">-</span>i, recursive_fn)])
+[<span class="st">&#39;()()()&#39;</span>, <span class="st">&#39;()(())&#39;</span>, <span class="st">&#39;(())()&#39;</span>, <span class="st">&#39;(()())&#39;</span>, <span class="st">&#39;((()))&#39;</span>]</code></pre></div>
+<p>And there’s our one-liner.</p>
+<h2 id="food-for-thought">Food for thought</h2>
+<p>Even within the slightly crazy world of one-liners, there’s still room to improve this function. Interested readers might like to try improving this so that it looks like <code>(...)(3)</code> instead of <code>(...)(3, ...)</code>. Another fun improvement would be to arrange matters so that in the function definition for the parenthesis generator you didn’t have to type <code>recursive_fn(i, recursive_fn)</code> but instead could just type <code>recursive_fn(i)</code>, and have some other part of the one-liner expand that appropriately.</p>
+<p>Additionally, <a href="https://en.wikipedia.org/wiki/Python_syntax_and_semantics#Generators">generator comprehensions</a> are probably more appropriate than list comprehensions here, especially if <code>n</code> is largish.</p>
+</body>
+</html>
