@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="author" content="hnuchi">
+  <title>Haggai Nuchi - Why wobbly tables?</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+</head>
+<body>
+<div class="nav">
+<ul>
+<li><a href="/">about</a></li>
+<li><a href="/writings.html">writings</a></li>
+<li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
+</ul>
+</div>
+<h1 id="why-am-i-interested-in-the-wobbly-table-problem">Why am I interested in the Wobbly Table Problem?</h1>
+<p>Elsewhere in this site you can find my <a href="/wobblytable.html">description and solution to the Wobbly Table Problem</a>. Here I’ll describe why I became interested in that problem. My thanks to my friend <a href="https://www.laurenjand.com/">Lauren J. Andrews</a> for inspiring me to write this essay.</p>
+<h2 id="why-am-i-interested-in-any-mathematical-problem">Why am I interested in <em>any</em> mathematical problem?</h2>
+<p>I’ve been especially interested in math from a very young age (as young as I can remember) and that interest remained constant enough that I majored in math in college, went to graduate school for math, got a PhD in math, and spent some time doing postdoctoral research in math. What’s so interesting about math?</p>
+<p>The interest can split into (at least) two distinct pieces, one of which is social and which will probably be familiar to practitioners of other creative fields, and the other of which is particular to mathematics and which you can think of as “taste” or “aesthetics”.</p>
+<h3 id="social-mathematics">Social mathematics</h3>
+<p>Part of getting interested in a particular mathematical problem is getting interested together with other people. There’s an excitement in thinking “hey wait ’til I show them this new idea I had!” or in hearing someone else’s ideas, or the satisfaction of collaborating effectively. I’ve had this experience in mathematics but also in programming (“let’s implement this algorithm together”), music (“let’s figure out a good harmony line here”), and dance (“let’s figure out this rhythm”).</p>
+<p>This isn’t enough to sustain interest in a mathematical problem by itself, though it does contribute. A mathematical problem has to also be interesting — aesthetically pleasing — for its own sake.</p>
+<h3 id="aesthetics-in-mathematics">Aesthetics in mathematics</h3>
+<p>I won’t be able to capture everything about what makes a mathematical problem aesthetically pleasing, but I’ll try pointing at one piece of it. I enjoy the creative transformation of a math problem in a way that leads to a surprising solution.</p>
+<p>Let me unpack that by way of an example. Let’s say you’ve just learned about adding numbers together but haven’t learned about multiplication yet. And you’ve noticed that if you add together, say, <span class="math inline">\(3+3+3+3+3\)</span>, you get the same thing as <span class="math inline">\(5+5+5\)</span>. In other words if you count upwards by threes, and stop after five threes, 3, 6, 9, 12, 15, you get the same thing as if you count upwards by fives, and stop after three fives, 5, 10, 15. They’re both 15. Why is that?</p>
+<p>If you know about multiplication, you know that one is <span class="math inline">\(5 \times 3\)</span> and the other is <span class="math inline">\(3 \times 5\)</span> and that they’re the same number. Which one is which? Do you remember offhand? Maybe it’s been so long since you’ve learned that they’re the same, that it’s hard to even make that distinction. But children aren’t <em>born</em> knowing that <span class="math inline">\(3 \times 5\)</span> is the same as <span class="math inline">\(5 \times 3\)</span>. How do you convince them?</p>
+<p>An act of creative transformation is to express the sum with geometry: five threes as the columns of a rectangle. This is a transformation because the original problem has nothing to do with rectangles. It’s creative because it requires an insight. And the surprise comes from seeing that it actually works to solve the problem: Count the rectangle by its rows instead of its columns and you see straightaway that five threes is the same as three fives, and that this trick will work for any two numbers, not just five and three.</p>
+<figure>
+<img src="/assets/three5five3.svg" alt="3+3+3+3+3 = 5+5+5" /><figcaption><span class="math inline">\(3+3+3+3+3 = 5+5+5\)</span></figcaption>
+</figure>
+<p>The best kinds of transformations are the ones that work for a range of problems, not just one. The turn-the-sum-into-a-rectangle trick is great because it can solve other problems too. For example, how do I add up the numbers <span class="math inline">\(1+2+3+4+5\)</span>? If I have internalized the rectangle trick, the following solution might occur to me:</p>
+<figure>
+<img src="/assets/12345.svg" alt="1+2+3+4+5 = \frac{1}{2} 5 \times (5+1)" /><figcaption><span class="math inline">\(1+2+3+4+5 = \frac{1}{2} 5 \times (5+1)\)</span></figcaption>
+</figure>
+<h2 id="the-wobbly-table-problem">The wobbly table problem</h2>
+<p>I first encountered this problem from my former coworkers at <a href="https://www.getcruise.com/">Cruise Automation</a>. We were already solving other problems together — figuring out how to make cars drive themselves — and discussed the wobbly table problem for fun during lunch and coffee breaks. The team included people with degrees in math and physics and this problem was a fun diversion for us.</p>
+<p>My mathematical interest in it came at first from noticing that it was surprisingly resistant to a solution. There were many easily found “solutions” online, but the ones I saw were imprecise and made hidden assumptions that were not made explicit. These stick out like someone playing a wrong note.</p>
+<p>Later, after playing with the problem more, I <a href="/wobblytable.html">realized it could be transformed into a statement about the existence of certain kinds of functions from the special orthogonal group <span class="math inline">\(SO(3)\)</span> to the 2–sphere</a>, and that <a href="https://en.wikipedia.org/wiki/Rotation_group_SO(3)#Topology"><span class="math inline">\(SO(3)\)</span> is intimately related to the 3–sphere</a>, and that functions from the 3–sphere to the 2–sphere are intimately related to an object called the <a href="https://en.wikipedia.org/wiki/Hopf_fibration">Hopf fibration</a>, which I’d studied in great depth in <a href="https://www.math.upenn.edu/grad/dissertations/NuchiThesis.pdf">my dissertation [pdf]</a>.</p>
+<p>So in the end my interest came from seeing a transformation of the Wobbly Table Problem into a different area of mathematics, and in particular an area which I had explored at great length.</p>
+</body>
+</html>
