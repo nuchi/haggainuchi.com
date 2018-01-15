@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="author" content="hnuchi">
+  <title>Haggai Nuchi - Training machine learning models in the cloud</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<div class="nav">
+<ul>
+<li><a href="/">about</a></li>
+<li><a href="/writings.html">writings</a></li>
+<li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
+</ul>
+</div>
+<h1 id="assorted-things-i-learned-about-training-machine-learning-models-in-the-cloud">Assorted things I learned about training machine learning models in the cloud</h1>
+<p>I’m using Google Cloud Platform (GCP) to train a machine learning model. Specifically I’m using <a href="https://www.tensorflow.org/">Tensorflow</a> and installing it myself on a Compute Engine instance. GCP offers a product which lets you train with Tensorflow without having to set it up yourself, but I elected to install it from scratch on a bare computer running just a fresh Ubuntu operating system. (Side note: this website is also running on a Compute Engine instance.)</p>
+<p>This post contains some interesting things I learned, and <a href="https://github.com/nuchi/tensorflow-clean-stop-session-hook">a link to something I wrote to be able to cleanly stop an active training process while saving progress</a>.</p>
+<h2 id="you-can-train-on-a-gpu-and-use-preemptible-instances-with-free-trial-credits.">1. You can train on a GPU, and use preemptible instances, with free trial credits.</h2>
+<p>I found training on a GPU to be much faster than training on CPUs. Using a preemptible instance means that you pay half price in exchange for Google reserving the right to randomly shut off your computer if they feel like it. That’s a reasonable trade if you don’t need to get it done <em>now</em>; they provide time to shut down running processes and save data.</p>
+<p>Also, Google offers free trial credits! The amount they offer has changed over time but I got started with $300 for free. The catch: they don’t allow training on GPUs or using preemptible instances while you’re in your free trial.</p>
+<p>The double catch: You can upgrade your free trial to a paid account, <em>keep</em> the free trial credits in your paid account, and train with GPUs and preemptible instances with those free credits.</p>
+<h2 id="installing-software-necessary-to-train-on-a-gpu-is-very-annoying.">2. Installing software necessary to train on a GPU is very annoying.</h2>
+<p>Nvidia does not, so far as I know, have a one-step process to install all necessary drivers and software required to train with its GPUs using Tensorflow. I had to install something called a CUDA Toolkit, a cuDNN, and a driver for the GPU. Each of those had to be the exact right version for the version of Tensorflow I was using or else it would not work. Usually if something says it requires “Version 4.0 of thing X” then installing Version 4.1 of thing X is okay. Not so in this case. If Tensorflow expects CUDA Toolkit version 9.0, then you cannot use version 9.1.</p>
+<p>Nvidia “helpfully” provides multiple different ways of installing each of those things. That’s not actually that helpful, because it means that there is not a single way to do it, so searching elsewhere for instructions provides multiple answers. Some of those answers change over time and become invalid. No one provides easy methods of uninstalling anything, so if you mess up and install the wrong version, you have to spend more time searching for how to remove the stuff.</p>
+<p>For the record, my winning solution involved installing CUDA Toolkit via “the runfile method” (<code>sudo sh cuda-toolkit.run</code> — apparently you have to make sure to select “no” when prompted to install the driver), installing cuDNN via copying files manually to the <code>/usr</code> directory, and installing the driver via <code>sudo ubuntu-drivers autoinstall</code> (<code>ubuntu-drivers</code> had to be installed separately).</p>
+<h2 id="cleanly-interrupting-training-using-tensorflows-estimator-api">3. Cleanly interrupting training using Tensorflow’s Estimator API</h2>
+<p>I’m training a model using Tensorflow’s <a href="https://www.tensorflow.org/programmers_guide/estimators">Estimator API</a>. Tensorflow is a Python library, and by default, if you send an interrupt signal to a running Python process (for example by entering ctrl-C at the terminal), the Python runtime raises a KeyboardInterrupt exception which abruptly halts everything.</p>
+<p>This is <em>usually</em> what one would want — if you interrupt something then you want it to stop right away — but sometimes you’d like it to clean up and put away its things first. Since I’m using preemptible instances to make training cheaper, I’m running the risk of getting shut down at any moment. Which means that I’d like to save my current progress instead of immediately tearing everything down if I get interrupted.</p>
+<p>The Estimator API allows one to specify custom “hooks”: a hook is a piece of code that runs at pre-defined times, such as before training starts, before or after each single training step, after training ends. So I wrote a custom hook that catches an interrupt signal, and politely requests that the Estimator please stop training after this step, and save its current progress. You can <a href="https://github.com/nuchi/tensorflow-clean-stop-session-hook">view the source code</a>.</p>
+<p>Then I add a shutdown script to my preemptible instance:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
+<span class="ex">pgrep</span> -f <span class="st">&quot;python&quot;</span> <span class="kw">|</span> <span class="fu">xargs</span> kill -SIGINT</code></pre></div>
+<p>This just searches for all running processes containing the term “python” (my training process should be the only one) and then sends whatever it finds an interrupt signal. When my preemptible instance is being shut down, GCP is kind enough to first run the shutdown script, which gives my training process time to cleanly save its progress.</p>
+</body>
+</html>
