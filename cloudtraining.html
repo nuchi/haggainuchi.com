@@ -37,7 +37,8 @@
 <p>The Estimator API allows one to specify custom “hooks”: a hook is a piece of code that runs at pre-defined times, such as before training starts, before or after each single training step, after training ends. So I wrote a custom hook that catches an interrupt signal, and politely requests that the Estimator please stop training after this step, and save its current progress. You can <a href="https://github.com/nuchi/tensorflow-clean-stop-session-hook">view the source code</a>.</p>
 <p>Then I add a shutdown script to my preemptible instance:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
-<span class="ex">pgrep</span> -f <span class="st">&quot;python&quot;</span> <span class="kw">|</span> <span class="fu">xargs</span> kill -SIGINT</code></pre></div>
-<p>This just searches for all running processes containing the term “python” (my training process should be the only one) and then sends whatever it finds an interrupt signal. When my preemptible instance is being shut down, GCP is kind enough to first run the shutdown script, which gives my training process time to cleanly save its progress.</p>
+<span class="ex">pgrep</span> -f <span class="st">&quot;train&quot;</span> <span class="kw">|</span> <span class="fu">xargs</span> kill -SIGINT</code></pre></div>
+<p>This just searches for all running processes whose containing the term “train” (for instance, it will match a command executed with <code>python train.py</code> — my training process should be the only one that matches the search) and then sends whatever it finds an interrupt signal. When my preemptible instance is being shut down, GCP is kind enough to first run the shutdown script, which gives my training process time to cleanly save its progress.</p>
+<p><strong>Addendum:</strong> It turns out that GCP is not so reliable about running the shutdown script. See my post about <a href="/shutdown.html">working around unreliable shutdown scripts</a> for details.</p>
 </body>
 </html>
