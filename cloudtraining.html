@@ -21,6 +21,7 @@
 <li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
 </ul>
 </div>
+<p><strong>Update, Dec 2020: I wrote this several years ago, before Google released <a href="https://colab.research.google.com/">colab</a>. If I were training ML models in the cloud now, as an individual instead of setting up scalable infrastructure for training, I’d just use colab instead of all the stuff I describe below.</strong></p>
 <h1 id="assorted-things-i-learned-about-training-machine-learning-models-in-the-cloud">Assorted things I learned about training machine learning models in the cloud</h1>
 <p>I’m using Google Cloud Platform (GCP) to train a machine learning model. Specifically I’m using <a href="https://www.tensorflow.org/">Tensorflow</a> and installing it myself on a Compute Engine instance. GCP offers a product which lets you train with Tensorflow without having to set it up yourself, but I elected to install it from scratch on a bare computer running just a fresh Ubuntu operating system. (Side note: this website is also running on a Compute Engine instance.)</p>
 <p>This post contains some interesting things I learned, and <a href="https://github.com/nuchi/tensorflow-clean-stop-session-hook">a link to something I wrote to be able to cleanly stop an active training process while saving progress</a>.</p>

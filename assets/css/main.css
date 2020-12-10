@@ -19,20 +19,28 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   page-break-after: avoid; /* Firefox, Chrome, and Safari do not support the property value "avoid" */
-  margin-top: 2em;
-  margin-bottom: 0em;
+  margin-top: 1.5em;
+  margin-bottom: 0.25em;
 }
 
 h1 { font-size: 2em; }
-h2 { font-size: 1.75em; }
-h3 { font-size: 1.50em; }
+h2 {
+  font-size: 1.50em;
+}
+h3 {
+  font-size: 1.25em;
+  font-weight: bold;
+}
 h4 { font-size: 1.25em; }
 h5 { font-size: 1.15em; }
 h6 { font-size: 1.00em; }
 
-p {}
+p {
+  margin-top: 0em;
+  margin-bottom: 1em;
+}
 
-blockquote { 
+blockquote {
   font-style: italic;
   margin: 1;
   padding-left: 1.5em;
@@ -104,7 +112,7 @@ code
     {
     background-color: #f8f8f8;
     }
-    
+
 /* This will be only for code blocks */
 pre, pre > code
     {
@@ -140,6 +148,10 @@ div.nav {
 
 div.nav li {
   display: inline;
+}
+
+div.nav ul {
+  padding-left: 0;
 }
 
 div.nav a {
