@@ -1,63 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta name="author" content="hnuchi">
-  <title>Haggai Nuchi - Inscribed Squares and Rectangles</title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-  <link rel="stylesheet" href="assets/css/main.css">
-  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
-</head>
-<body>
-<div class="nav">
-<ul>
-<li><a href="/">about</a></li>
-<li><a href="/writings.html">writings</a></li>
-<li><a href="/cv.html">cv</a></li>
-<li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
-</ul>
-</div>
-<h1 id="the-inscribed-square-and-inscribed-rectangle-conjectures">The Inscribed Square and Inscribed Rectangle Conjectures</h1>
-<p>This is part 1 of a two-part post, both dealing with the same pair of interesting mathematical problems in the realm of geometric topology. The statements of the two problems are accessible to a wide audience, even if the methods of solving them are not. Read on! Or go straight to <a href="/inscribeddetails.html">part 2</a>.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inscribed Squares and Rectangles - Haggai Nuchi</title>
+    <script type="module" crossorigin src="/assets/katex.4bd3588e.js"></script>
+    <link rel="stylesheet" href="/assets/katex.fe55f891.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="nav">
+        <ul>
+        <li><a href="/">about</a></li>
+        <li><a href="/writings.html">writings</a></li>
+        <li><a href="/cv.html">cv</a></li>
+        <li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
+        </ul>
+      </div>
+      <div class="container"><div class="content"><h1 id="the-inscribed-square-and-inscribed-rectangle-conjectures" tabindex="-1">The Inscribed Square and Inscribed Rectangle Conjectures <a class="header-anchor" href="#the-inscribed-square-and-inscribed-rectangle-conjectures" aria-hidden="true">•</a></h1>
+<p>This is part 1 of a two-part post, both dealing with the same pair of interesting mathematical problems in the realm of geometric topology. The statements of the two problems are accessible to a wide audience, even if the methods of solving them are not. Read on! Or go straight to <a href="./inscribeddetails.html">part 2</a>.</p>
 <p>The first problem, the Inscribed Square Conjecture, was first asked more than 100 years ago and is still unsolved. A lot of partial progress has been made on it but a full solution is elusive; there’s a roadblock which is difficult to get around. The second problem, the Inscribed Rectangle Conjecture, is the first problem’s less famous cousin. It’s difficult for different reasons, though even if those different reasons were surmounted, one would still run into the same annoying roadblock that plagues the Square problem.</p>
-<p>(Some mathematical problems have appeal precisely because they are easily stated, and also resist solution for very long periods of time. I’ve written <a href="/wobblytablewhy.html">some other reasons</a> why I find some mathematical problems interesting.)</p>
+<p>(Some mathematical problems have appeal precisely because they are easily stated, and also resist solution for very long periods of time. I’ve written <a href="./wobblytablewhy.html">some other reasons</a> why I find some mathematical problems interesting.)</p>
 <p>In this first part, I’ll describe these two problems, how some partial solutions have been attempted, and why they’re so difficult. For more historical context and state of current knowledge about these problems, see <a href="http://www.ams.org/notices/201404/rnoti-p346.pdf">Benjamin Matschke’s excellent survey article [pdf]</a>.</p>
-<p>In the <a href="/inscribeddetails.html">second part</a>, I describe some partial ideas I had on how to tackle the second problem, the Inscribed Rectangle Conjecture. This act goes against instincts I learned in graduate school and as a postdoc: any original ideas I might have about famous unsolved problems should be held close, because they are competitive advantages. But seeing as how I’ve already rejected advice commonly given to graduate students, postdocs, and new professors — namely to avoid like the plague famous unsolved problems, because you’ll fail and throw away effort with nothing to show for it — I will go ahead and post my ideas anyway, and maybe someone will take them somewhere interesting.</p>
-<h2 id="the-inscribed-square-conjecture">The Inscribed Square Conjecture</h2>
-<h3 id="the-statement">The statement</h3>
+<p>In the <a href="./inscribeddetails.html">second part</a>, I describe some partial ideas I had on how to tackle the second problem, the Inscribed Rectangle Conjecture. This act goes against instincts I learned in graduate school and as a postdoc: any original ideas I might have about famous unsolved problems should be held close, because they are competitive advantages. But seeing as how I’ve already rejected advice commonly given to graduate students, postdocs, and new professors — namely to avoid like the plague famous unsolved problems, because you’ll fail and throw away effort with nothing to show for it — I will go ahead and post my ideas anyway, and maybe someone will take them somewhere interesting.</p>
+<h2 id="the-inscribed-square-conjecture" tabindex="-1">The Inscribed Square Conjecture <a class="header-anchor" href="#the-inscribed-square-conjecture" aria-hidden="true">•</a></h2>
+<h3 id="the-statement" tabindex="-1">The statement <a class="header-anchor" href="#the-statement" aria-hidden="true">•</a></h3>
 <p>For any simple closed curve in the plane, are there necessarily four points on the curve which form the vertices of a square? The Inscribed Square Conjecture states that the answer is “yes”.</p>
 <p>What’s a simple closed curve? The intuitive answer: draw a curve on a piece of paper without lifting your pen. “Simple” means it doesn’t intersect itself, so no figure eights allowed; “closed” means it joins up where it started, so the numeral zero is okay but the numeral seven is not. So basically, the numeral zero, except that it can be wiggly and bumpy instead of round.</p>
-<figure>
-<img src="/assets/boomerangwithsquare.svg" alt="A simple closed curve with an inscribed square. The vertices lie on the curve; it’s okay for the edges of the square to spill outside the curve." /><figcaption>A simple closed curve with an inscribed square. The vertices lie on the curve; it’s okay for the edges of the square to spill outside the curve.</figcaption>
-</figure>
+<figure><img src="/assets/boomerangwithsquare.54a3bd5e.svg" alt=""><figcaption>A simple closed curve with an inscribed square. The vertices lie on the curve; it’s okay for the edges of the square to spill outside the curve.</figcaption></figure>
 <p>The more precise definition of “simple closed curve” is quite technical, and for the purposes of this post I’d love to not have to mention it at all. <em>However</em>, as it turns out, the Inscribed Square Conjecture is known to be true for those simple closed curves which reasonably match the intuitive explanation I just gave, and is unknown for curves which match the technical definition but not the intuition.</p>
 <p>To elaborate a bit: the technical definition of “simple closed curve” includes things like the smooth curves I described, and also things like polygons, and things like hybrids between smooth curves and polygons (which are smooth but with some corners). Those “regular” curves <em>are</em> known to have inscribed squares. But the technical definition also includes “irregular” weird monsters like the Koch Snowflake and other nowhere-smooth fractal messes, and those kinds of things are the ones for which the Inscribed Square Conjecture remains open. In other words, it might be that there’s some horrible fractal simple closed curve which has no inscribed squares; but no one knows.</p>
-<h3 id="the-solution">The solution</h3>
+<h3 id="the-solution" tabindex="-1">The solution <a class="header-anchor" href="#the-solution" aria-hidden="true">•</a></h3>
 <p>How is this proved, that regular curves always have inscribed squares? There are different proof strategies for different kinds of regularity — one proof for smooth curves, another for polygons, another for convex curves — but they all rely on the strategy of showing that in fact regular curves have an <em>odd</em> number of inscribed squares. Zero is an even number, not odd, so the curve can’t have zero inscribed squares. The rough idea is something like the following (keeping in mind that this is only a rough schematic, not a precise proof).</p>
 <p>Instead of trying to count the number of inscribed squares of just a single simple closed curve, look at a deformation of one simple closed curve into another, and keep track of the inscribed squares through the deformation.</p>
 <p>In particular, start with an ellipse, which has a single inscribed square, and deform it to any other simple closed curve. So we have a 1–parameter family of simple closed curves. At each stage of the deformation we have some discrete set of inscribed squares, so taken all together we have a 1–parameter family of inscribed squares. Those form a collection of abstract curves of squares, pictured below in a schematic.</p>
-<figure>
-<img src="/assets/squaredeformation.svg" alt="As we deform the ellipse into a different curve, squares pop into being and disappear two at a time. Here is an example of a pair of squares popping into being and separating. The middle image is the moment of creation." /><figcaption>As we deform the ellipse into a different curve, squares pop into being and disappear two at a time. Here is an example of a pair of squares popping into being and separating. The middle image is the moment of creation.</figcaption>
-</figure>
+<figure><img src="/assets/squaredeformation.03e7e298.svg" alt=""><figcaption>As we deform the ellipse into a different curve, squares pop into being and disappear two at a time. Here is an example of a pair of squares popping into being and separating. The middle image is the moment of creation.</figcaption></figure>
 <p>Squares appear and disappear two at a time during the deformation, and we started with one square in the ellipse, so we must end up with an odd number of squares, and in particular at least one square. (Well, we might end up with two squares having just collided into one, or one square about to separate into two, but we can’t actually have <em>no</em> squares.) That’s the essence of the proof — again, it’s just a schematic, and to make it precise requires assuming that the simple closed curves are regular enough (ie smooth, or polygonal, etc).</p>
-<h2 id="the-inscribed-rectangle-conjecture">The Inscribed Rectangle Conjecture</h2>
-<h3 id="like-the-square-version-but-harder">Like the Square version, but harder</h3>
-<p>For any simple closed curve in the plane, are there necessarily four points on the curve which form the vertices of a rectangle with aspect ratio <span class="math inline">\(r \geq 1\)</span>? The Inscribed Rectangle Conjecture states that the answer is “yes”.</p>
+<h2 id="the-inscribed-rectangle-conjecture" tabindex="-1">The Inscribed Rectangle Conjecture <a class="header-anchor" href="#the-inscribed-rectangle-conjecture" aria-hidden="true">•</a></h2>
+<h3 id="like-the-square-version%2C-but-harder" tabindex="-1">Like the Square version, but harder <a class="header-anchor" href="#like-the-square-version%2C-but-harder" aria-hidden="true">•</a></h3>
+<p>For any simple closed curve in the plane, are there necessarily four points on the curve which form the vertices of a rectangle with aspect ratio <span v-pre class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>≥</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r \geq 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7719400000000001em;vertical-align:-0.13597em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">r</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>? The Inscribed Rectangle Conjecture states that the answer is “yes”.</p>
 <p>This can be seen as a generalization of the Square problem. Squares are just a special kind of rectangle, with aspect ratio 1 (aspect ratio is the ratio of the length of the longer side to the shorter side). Why should squares get their own conjecture and not all other rectangles too? Let’s be fair to all aspect ratios please.</p>
 <p>This conjecture is unknown even for regular curves, because the strategy that works so well for squares fails for non-square rectangles. The reason is that, although regular curves have an odd (and therefore non-zero) number of squares, regular curves have an <em>even</em> number of rectangles.</p>
 <p>An ellipse has two rectangles of every aspect ratio bigger than 1 (ie the non-square rectangles). If we start with an ellipse and deform it into some other curve, it <em>might</em> turn out that the two rectangles cancel each other out in the end.</p>
-<figure>
-<img src="/assets/rectangledeformation.svg" alt="The rectangles don’t actually all vanish for this example, but it could happen in principle." /><figcaption>The rectangles don’t actually all vanish for this example, but it could happen in principle.</figcaption>
-</figure>
+<figure><img src="/assets/rectangledeformation.39f27487.svg" alt=""><figcaption>The rectangles don’t actually all vanish for this example, but it could happen in principle.</figcaption></figure>
 <p>No one knows of any example where they do end up canceling out, but for all anyone knows, it’s perfectly possible.</p>
-<h3 id="some-incomplete-thoughts">Some incomplete thoughts</h3>
-<p>I tried for a few months to find a solution to the Inscribed Rectangle Conjecture. There were at least three separate occasions where I was convinced I had found a partial or complete solution — and I was wrong every time. That is not a very unusual phenomenon. In fact even with this particular problem, someone published a proof 20 years ago where the author introduced a minus sign somewhere in a computation, and computed <span class="math inline">\(-1 - 1 = -2\)</span> (which would have been a proof) but where the true answer was <span class="math inline">\(-1 + 1 = 0\)</span> (not a proof). I’m very grateful to this author, because I made <em>essentially the same mistake</em>, and the knowledge of this published error inspired me to recheck my calculations even though I was “sure” I hadn’t made the same mistake.</p>
+<h3 id="some-incomplete-thoughts" tabindex="-1">Some incomplete thoughts <a class="header-anchor" href="#some-incomplete-thoughts" aria-hidden="true">•</a></h3>
+<p>I tried for a few months to find a solution to the Inscribed Rectangle Conjecture. There were at least three separate occasions where I was convinced I had found a partial or complete solution — and I was wrong every time. That is not a very unusual phenomenon. In fact even with this particular problem, someone published a proof 20 years ago where the author introduced a minus sign somewhere in a computation, and computed <span v-pre class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1</mn><mo>−</mo><mn>1</mn><mo>=</mo><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">-1 - 1 = -2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">−</span><span class="mord">2</span></span></span></span> (which would have been a proof) but where the true answer was <span v-pre class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">-1 + 1 = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">−</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span> (not a proof). I’m very grateful to this author, because I made <em>essentially the same mistake</em>, and the knowledge of this published error inspired me to recheck my calculations even though I was “sure” I hadn’t made the same mistake.</p>
 <p>In <a href="/inscribeddetails.html">part 2</a>, I describe what I think are my most promising ideas for solving this problem. They don’t (yet) lead to a solution but I think there’s room for taking them further.</p>
-<p>If you’d like to play around with looking at inscribed squares and rectangles, Benjamin Matschke (who wrote the survey article I linked earlier) has a fantastic <a href="http://people.mpim-bonn.mpg.de/matschke/squarepeg2/">interactive online tool to view inscribed squares and rectangles</a>.</p>
-</body>
+<p>If you’d like to play around with looking at inscribed squares and rectangles, Benjamin Matschke (who wrote the survey article I linked earlier) has a fantastic <a href="https://www.math.u-bordeaux.fr/~bmatschke/squarepeg2/html5.php">interactive online tool to view inscribed squares and rectangles</a>.</p>
+</div></div>
+    </div>
+    
+  </body>
 </html>

@@ -1,36 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta name="author" content="hnuchi">
-  <title>Haggai Nuchi - Reliably executing shutdown scripts in Google Compute Engine</title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-  <link rel="stylesheet" href="assets/css/main.css">
-</head>
-<body>
-<div class="nav">
-<ul>
-<li><a href="/">about</a></li>
-<li><a href="/writings.html">writings</a></li>
-<li><a href="/cv.html">cv</a></li>
-<li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
-</ul>
-</div>
-<p><strong>Update, Dec 2020: I wrote this several years ago, before Google released <a href="https://colab.research.google.com/">colab</a>. If I were training ML models in the cloud now, as an individual instead of setting up scalable infrastructure for training, I’d just use colab instead of all the stuff I describe below.</strong></p>
-<h1 id="reliably-executing-shutdown-scripts-in-google-compute-engine">Reliably executing shutdown scripts in Google Compute Engine</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reliably executing shutdown scripts in Google Compute Engine - Haggai Nuchi</title>
+    <script type="module" crossorigin src="/assets/katex.4bd3588e.js"></script>
+    <link rel="stylesheet" href="/assets/katex.fe55f891.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="nav">
+        <ul>
+        <li><a href="/">about</a></li>
+        <li><a href="/writings.html">writings</a></li>
+        <li><a href="/cv.html">cv</a></li>
+        <li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
+        </ul>
+      </div>
+      <div class="container"><div class="content"><p><strong>Update, Dec 2020: I wrote this several years ago, before Google released <a href="https://colab.research.google.com/">colab</a>. If I were training ML models in the cloud now, as an individual instead of setting up scalable infrastructure for training, I’d just use colab instead of all the stuff I describe below.</strong></p>
+<h1 id="reliably-executing-shutdown-scripts-in-google-compute-engine" tabindex="-1">Reliably executing shutdown scripts in Google Compute Engine <a class="header-anchor" href="#reliably-executing-shutdown-scripts-in-google-compute-engine" aria-hidden="true">•</a></h1>
 <p>In a <a href="/cloudtraining.html">previous post about training machine learning models in the cloud</a>, I wrote about some interesting things I learned in the process of installing and using Tensorflow on Google Compute Engine instances. One of the things I wrote about was using shutdown scripts to save current progress when an instance gets preempted. It turns out I was a bit optimistic about its reliability; in this post I’ll describe the difficulties I had getting a shutdown script to run, and how I worked around it.</p>
-<h2 id="what-is-a-shutdown-script">What is a shutdown script?</h2>
+<h2 id="what-is-a-shutdown-script%3F" tabindex="-1">What is a shutdown script? <a class="header-anchor" href="#what-is-a-shutdown-script%3F" aria-hidden="true">•</a></h2>
 <p>When you create an instance with Google Compute Engine, you can specify a <a href="https://cloud.google.com/compute/docs/shutdownscript">shutdown script</a>. That means you specify a script that gets automatically run, ostensibly, whenever your instance is rebooted, turned off, stopped, or deleted. If you only ever take those actions manually, then a shutdown script might not be too important — if you’re taking one action to stop your instance, you might as well take two actions and manually run a script right before you stop your instance.</p>
 <p>But if you will ever have your instance stopped by someone else for some other reason — like if you’re trying to save money by using a preemptible instance (where you get half off the price in exchange for maybe the instance will be shut off at some random time) — then it can be very important to have an automatic script running just before shutoff that will save any computations in progress.</p>
-<h2 id="can-i-trust-a-shutdown-script-to-be-run">Can I trust a shutdown script to be run?</h2>
+<h2 id="can-i-trust-a-shutdown-script-to-be-run%3F" tabindex="-1">Can I trust a shutdown script to be run? <a class="header-anchor" href="#can-i-trust-a-shutdown-script-to-be-run%3F" aria-hidden="true">•</a></h2>
 <p>Maybe. In Google’s docs that I linked above, they write:</p>
 <blockquote>
-<p>Create and run shutdown scripts that execute commands right before an instance is terminated or restarted, on a <strong>best-effort</strong> basis. Compute Engine only executes shutdown scripts on a best-effort basis and does not guarantee that the shutdown script will be run in all cases.</p>
+<p>Create and run shutdown scripts that execute commands right before an instance is terminated or restarted, on a <strong>best-effort</strong> basis.
+Compute Engine only executes shutdown scripts on a best-effort basis and does not guarantee that the shutdown script will be run in all cases.</p>
 </blockquote>
 <p>Emphasis theirs. Later, on the same page:</p>
 <blockquote>
@@ -38,7 +35,8 @@
 </blockquote>
 <p>How long is this “limited time period”? Let’s look at their <a href="https://cloud.google.com/compute/docs/instances/stopping-or-deleting-an-instance#delete_timeout">documentation on the shutdown period</a>:</p>
 <blockquote>
-<p>When you shut down or delete an instance, Compute Engine sends the ACPI Power Off signal to the instance and waits a short period of time for your instance to shut down cleanly. If your instance is still running after this grace period, Compute Engine forcefully terminates it even if your shutdown script is still running. The length of the shutdown period depends on the type of your instance.</p>
+<p>When you shut down or delete an instance, Compute Engine sends the ACPI Power Off signal to the instance and waits a short period of time for your instance to shut down cleanly. If your instance is still running after this grace period, Compute Engine forcefully terminates it even if your shutdown script is still running.
+The length of the shutdown period depends on the type of your instance.</p>
 <ul>
 <li>Normal instances have a shutdown period that usually lasts at least 90 seconds, but could be longer.</li>
 <li>Preemptible instances have a shutdown period that lasts 30 seconds, which is the same length as the shutdown period that happens during the preemption process.</li>
@@ -49,21 +47,23 @@
 <p><strong>Note</strong>: Compute Engine does not guarantee the length of these shutdown periods and we recommend that you do not create any hard dependencies on these time limits.</p>
 </blockquote>
 <p>So, not much in the way of guarantees.</p>
-<h2 id="what-actually-happens-in-practice">What actually happens in practice?</h2>
+<h2 id="what-actually-happens-in-practice%3F" tabindex="-1">What actually happens in practice? <a class="header-anchor" href="#what-actually-happens-in-practice%3F" aria-hidden="true">•</a></h2>
 <p>What I want my shutdown script to do is find my training process and send it an interrupt signal. I’d also like to pause until the training process cleans up, so that the computer doesn’t just shut down immediately after the interrupt signal. Here’s the content of my script <code>shutdown.sh</code>:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co">#!/bin/bash</span>
-<span class="ex">pgrep</span> -f <span class="st">&quot;train&quot;</span> <span class="kw">|</span> <span class="fu">xargs</span> kill -SIGINT
-<span class="kw">while</span> <span class="ex">pgrep</span> -f <span class="st">&quot;train&quot;</span> <span class="op">&gt;</span> /dev/null<span class="kw">;</span> <span class="kw">do</span> <span class="fu">sleep</span> 1<span class="kw">;</span> <span class="kw">done</span></code></pre></div>
-<p>My training process is designed so that when it receives an interrupt signal, it finishes the last training step and then saves a training checkpoint. This takes about 6 seconds.</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="bu">time</span> ./shutdown.sh 
+<div class="language-"><pre><code>#!/bin/bash
+pgrep -f &quot;train&quot; | xargs kill -SIGINT
+while pgrep -f &quot;train&quot; &gt; /dev/null; do sleep 1; done
+</code></pre>
+</div><p>My training process is designed so that when it receives an interrupt signal, it finishes the last training step and then saves a training checkpoint. This takes about 6 seconds.</p>
+<div class="language-"><pre><code>$ time ./shutdown.sh 
 
-<span class="ex">real</span>    0m6.194s
-<span class="ex">user</span>    0m0.029s
-<span class="ex">sys</span> 0m0.016s</code></pre></div>
-<p>Well within the documented 30 seconds for preemptible instances! It should work fine… yet it doesn’t. (For testing, I added a line to write a “did this work” message to a file, to check if the script was being run at all. It was not being run.)</p>
+real    0m6.194s
+user    0m0.029s
+sys 0m0.016s
+</code></pre>
+</div><p>Well within the documented 30 seconds for preemptible instances! It should work fine… yet it doesn’t. (For testing, I added a line to write a “did this work” message to a file, to check if the script was being run at all. It was not being run.)</p>
 <p>When I execute the script via <code>google_metadata_script_runner --script-type=shutdown</code>, it runs. When I reboot via <code>sudo reboot</code>, it runs. When I stop the instance via the Compute Engine console… nope. When the instance gets preempted… nope.</p>
 <p>I tried creating a new fresh instance, not preemptible, with just a sample shutdown script… and it <em>did</em> run when I stopped the instance via the console, so there’s something weird going on with the particular preemptible instance I’m running.</p>
-<h2 id="what-did-i-do-about-it">What did I do about it?</h2>
+<h2 id="what-did-i-do-about-it%3F" tabindex="-1">What did I do about it? <a class="header-anchor" href="#what-did-i-do-about-it%3F" aria-hidden="true">•</a></h2>
 <p>I definitely wanted a working shutdown script. How does Google implement theirs, anyway? Maybe if I figure that out, I can adapt their method to my own use.</p>
 <p>Here’s a hint, from the <a href="https://cloud.google.com/compute/docs/instances/stopping-or-deleting-an-instance#delete_timeout">same excerpt I posted above</a>:</p>
 <blockquote>
@@ -71,26 +71,31 @@
 </blockquote>
 <p>What’s an ACPI Power Off signal? Searching around for keywords like “acpi power off ubuntu” (Ubuntu is the operating system I’m running on this instance) led me to several useful pages like e.g. <a href="https://ubuntuforums.org/showthread.php?t=2218671">this one</a>. Turns out there are two systems in place (at least in Ubuntu 16.04) that listen to the power off button; <code>acpid</code> and <code>logind</code>.</p>
 <p>Taking a look at the file <code>/etc/acpi/events/powerbtn</code> suggests that the script <code>/etc/acpi/powerbtn.sh</code> is called when the power button is pushed. That script, in turn, starts with:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="co">#!/bin/sh</span>
-<span class="co"># /etc/acpi/powerbtn.sh</span>
-<span class="co"># Initiates a shutdown when the power putton has been</span>
-<span class="co"># pressed.</span>
+<div class="language-bash"><pre class="language-bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># /etc/acpi/powerbtn.sh</span>
+<span class="token comment"># Initiates a shutdown when the power putton has been</span>
+<span class="token comment"># pressed.</span>
 
-<span class="bu">[</span> <span class="ot">-r</span> /usr/share/acpi-support/power-funcs<span class="bu"> ]</span> <span class="kw">&amp;&amp;</span> <span class="bu">.</span> <span class="ex">/usr/share/acpi-support/power-funcs</span>
+<span class="token punctuation">[</span> -r /usr/share/acpi-support/power-funcs <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token builtin class-name">.</span> /usr/share/acpi-support/power-funcs
 
-<span class="co"># If logind is running, it already handles power button presses; desktop</span>
-<span class="co"># environments put inhibitors to logind if they want to handle the key</span>
-<span class="co"># themselves.</span>
-<span class="kw">if</span> <span class="fu">pidof</span> systemd-logind <span class="op">&gt;</span>/dev/null<span class="kw">;</span> <span class="kw">then</span>
-    <span class="bu">exit</span> 0
-<span class="kw">fi</span>
+<span class="token comment"># If logind is running, it already handles power button presses; desktop</span>
+<span class="token comment"># environments put inhibitors to logind if they want to handle the key</span>
+<span class="token comment"># themselves.</span>
+<span class="token keyword">if</span> pidof systemd-logind <span class="token operator">></span>/dev/null<span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token builtin class-name">exit</span> <span class="token number">0</span>
+<span class="token keyword">fi</span>
 
-<span class="ex">...</span> <span class="co"># more stuff</span></code></pre></div>
-<p>That line that begins <code>if pidof systemd-logind &gt;/dev/null;</code> suggests that in fact <code>systemd-logind</code> handles shutdown behavior, but that this <code>powerbtn.sh</code> script is still called as some sort of legacy system that hands off responsibility to the newer system.</p>
+<span class="token punctuation">..</span>. <span class="token comment"># more stuff</span>
+</code></pre>
+</div><p>That line that begins <code>if pidof systemd-logind &gt;/dev/null;</code> suggests that in fact <code>systemd-logind</code> handles shutdown behavior, but that this <code>powerbtn.sh</code> script is still called as some sort of legacy system that hands off responsibility to the newer system.</p>
 <p>Presumably Google uses the <code>logind</code> system to add their own custom shutdown behavior. I didn’t want to go investigating how the <code>logind</code> system works, and luckily it turned out that I didn’t have to do that. That’s because altering the <code>powerbtn.sh</code> script is sufficient! I added the following line just above that <code>if</code> line:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="fu">sudo</span> su - h_nuchi bash -c <span class="st">&#39;/home/h_nuchi/shutdown.sh&#39;</span></code></pre></div>
-<p>And that did the trick! Now the shutdown script is gracefully called when the instance is manually stopped. I haven’t gotten the chance to see whether it’s called when the instance is preempted, because that happens unpredictably, but I’m cautiously optimistic because <a href="https://cloud.google.com/compute/docs/instances/preemptible#preemption_process">the documentation for preemptible instances</a> state you can simulate preemption by stopping the instance.</p>
-<h2 id="concluding-lessons">Concluding lessons</h2>
+<div class="language-bash"><pre class="language-bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">su</span> - h_nuchi <span class="token function">bash</span> -c <span class="token string">'/home/h_nuchi/shutdown.sh'</span>
+</code></pre>
+</div><p>And that did the trick! Now the shutdown script is gracefully called when the instance is manually stopped. I haven’t gotten the chance to see whether it’s called when the instance is preempted, because that happens unpredictably, but I’m cautiously optimistic because <a href="https://cloud.google.com/compute/docs/instances/preemptible#preemption_process">the documentation for preemptible instances</a> state you can simulate preemption by stopping the instance.</p>
+<h2 id="concluding-lessons" tabindex="-1">Concluding lessons <a class="header-anchor" href="#concluding-lessons" aria-hidden="true">•</a></h2>
 <p>If I were managing a large number of instances of different types, and needed custom shutdown behavior for each one, in complicated ways depending on lots of different factors… then the solution I discovered is probably too hacky. I’d want to use the hooks that Google provides, and properly use the shutdown metadata for the instances to handle the clean shutdown. But given that I’m only running this one instance (for now), and given that their system was unreliable, I’ll stick to the hacky solution.</p>
-</body>
+</div></div>
+    </div>
+    
+  </body>
 </html>
