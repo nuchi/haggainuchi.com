@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generating Sublime Text Syntax Definitions - Haggai Nuchi</title>
+    <script type="module" crossorigin src="/assets/style.4550fd65.js"></script>
+    <link rel="stylesheet" href="/assets/style.390e6a7d.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="nav">
+        <ul>
+        <li><a href="/">about</a></li>
+        <li><a href="/writings.html">writings</a></li>
+        <li><a href="/cv.html">cv</a></li>
+        <li><a href="&#x6d;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#104;&#x65;&#108;&#108;&#x6f;&#64;&#104;&#x61;&#x67;&#x67;&#x61;&#x69;&#110;&#x75;&#x63;&#104;&#x69;&#46;&#x63;&#x6f;&#x6d;" class="email">&#x63;&#x6f;&#110;&#116;&#x61;&#x63;&#116;</a></li>
+        </ul>
+      </div>
+      <div class="container"><div class="content"><h1 id="generating-sublime-text-syntax-definitions" tabindex="-1">Generating Sublime Text syntax definitions <a class="header-anchor" href="#generating-sublime-text-syntax-definitions" aria-hidden="true">•</a></h1>
+<p>This past year I started playing with the programming language <a href="https://faust.grame.fr/">Faust</a>, and I wanted better syntax highlighting for it in <a href="https://www.sublimetext.com/">Sublime Text</a>, the text editor I use for programming. I didn’t want to write a sublime-syntax definition file by hand, since that’s pretty complicated, so instead I wrote a program to generate one automatically from a language’s formal grammar. That turned out to be complicated, too! But it was more to my taste.</p>
+<p><strong>Note: you can view <a href="https://github.com/nuchi/sublime-from-cfg">the source code and documentation on Github</a>, and install the program via <code>pip install sublime-from-cfg</code> (requires Python 3.9). For example, something like:</strong></p>
+<div class="language-"><pre><code>$ python3.9 -m pip install sublime-from-cfg
+$ sublime-from-cfg my-language.sbnf -o my-language.sublime-syntax
+</code></pre>
+</div><p><strong>The Faust syntax I generated is <a href="https://github.com/nuchi/faust-sublime-syntax">here</a>.</strong></p>
+<h2 id="sublime-text%E2%80%99s-.sublime-syntax-files" tabindex="-1">Sublime Text’s <code>.sublime-syntax</code> files <a class="header-anchor" href="#sublime-text%E2%80%99s-.sublime-syntax-files" aria-hidden="true">•</a></h2>
+<p>Syntax highlighting is already included in Sublime Text for many popular languages, such as (for example) C, where code will automatically get colored something like this:</p>
+<div class="language-c"><pre class="language-c"><code class="language-c"><span class="token keyword">if</span> <span class="token punctuation">(</span>true<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Hello World!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><p>Notice that the <code>if</code>, <code>printf</code>, and <code>&quot;Hello World!&quot;</code> are colored differently. To create this syntax highlighting, a minimal <code>.sublime-syntax</code> file would look something like this:</p>
+<div class="language-yaml"><pre class="language-yaml"><code class="language-yaml"><span class="token directive important">%YAML 1.2</span>
+<span class="token punctuation">---</span>
+<span class="token key atrule">name</span><span class="token punctuation">:</span> C
+<span class="token key atrule">file_extensions</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>c<span class="token punctuation">,</span> h<span class="token punctuation">]</span>
+<span class="token key atrule">scope</span><span class="token punctuation">:</span> source.c
+
+<span class="token key atrule">contexts</span><span class="token punctuation">:</span>
+  <span class="token key atrule">main</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> \b(if<span class="token punctuation">|</span>else<span class="token punctuation">|</span>for<span class="token punctuation">|</span>while)\b
+      <span class="token key atrule">scope</span><span class="token punctuation">:</span> keyword.control.c
+    <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> <span class="token string">'"'</span>
+      <span class="token key atrule">push</span><span class="token punctuation">:</span> string
+    <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> (<span class="token punctuation">?</span>=\b<span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">:</span>alpha<span class="token punctuation">:</span><span class="token punctuation">]</span>_<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">:</span>alnum<span class="token punctuation">:</span><span class="token punctuation">]</span>_<span class="token punctuation">]</span><span class="token important">*\b\()</span>
+      <span class="token key atrule">push</span><span class="token punctuation">:</span> function<span class="token punctuation">-</span>call
+
+  <span class="token key atrule">string</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">meta_scope</span><span class="token punctuation">:</span> string.quoted.double.c
+    <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> <span class="token string">'"'</span>
+      <span class="token key atrule">pop</span><span class="token punctuation">:</span> <span class="token number">1</span>
+
+  <span class="token key atrule">function-call</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> \b<span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">:</span>alpha<span class="token punctuation">:</span><span class="token punctuation">]</span>_<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">:</span>alnum<span class="token punctuation">:</span><span class="token punctuation">]</span>_<span class="token punctuation">]</span><span class="token important">*\b</span>
+      <span class="token key atrule">scope</span><span class="token punctuation">:</span> variable.function.c
+    <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> \(
+      <span class="token key atrule">pop</span><span class="token punctuation">:</span> <span class="token number">1</span>
+</code></pre>
+</div><p>The syntax highlighting engine has a context stack which always starts in the <code>main</code> context at the start of the file you’re editing. Whenever one of the match objects in a context matches (as a regular expression) the current text, a context can be pushed onto the stack, or some number of contexts can be popped, and the syntax engine advances to the next part of the edited file. For example, when a double quote appears, the <code>string</code> context is pushed onto the stack. Then the syntax engine advances until the next double quote appears, and then the <code>string</code> context is popped off the stack and the syntax engine returns to the <code>main</code> context.</p>
+<p>These are just the most basic features available to authors of <code>.sublime-syntax</code> files. You can also do things like embed one language inside another (for example, to highlight an HTML <code>&lt;script&gt;</code> tag as JavaScript), do “nondeterministic” parsing by aborting when something unexpected happens and trying a different parsing strategy, and more.</p>
+<p>Programming languages can be quite complex, and therefore the <code>.sublime-syntax</code> files get quite complex too. The official Sublime Text C language syntax definition file is (at the time of writing) <a href="https://github.com/sublimehq/Packages/blob/bf13543d9f06c625039c92d7b986f32aba380adf/C%2B%2B/C.sublime-syntax">1320 lines long</a>. JavaScript’s is <a href="https://github.com/sublimehq/Packages/blob/bf13543d9f06c625039c92d7b986f32aba380adf/JavaScript/JavaScript.sublime-syntax">2533 lines long</a>. Java’s is <a href="https://github.com/sublimehq/Packages/blob/bf13543d9f06c625039c92d7b986f32aba380adf/Java/Java.sublime-syntax">3234 lines long</a>.</p>
+<h2 id="faust-already-has-a-language-definition" tabindex="-1">Faust already has a language definition <a class="header-anchor" href="#faust-already-has-a-language-definition" aria-hidden="true">•</a></h2>
+<p>The source code for the Faust programming language is freely available on Github. The parser for Faust is generated via <a href="https://github.com/grame-cncm/faust/blob/master-dev/compiler/parser/faustparser.y">a yacc source file</a>. Yacc is a parser generator: a program that consumes a formal grammar for a programming language, and generates a parser (an ingredient of a compiler) for that language. It’s a compiler for compilers. The part that’s relevant to me is: that means that there’s already a concise high-level description of the Faust programming language. An excerpt from the link above:</p>
+<div class="language-"><pre><code>program         : stmtlist
+                ;
+
+stmtlist        : /*empty*/
+                | stmtlist variantlist statement
+                ;
+
+statement       : IMPORT LPAR uqstring RPAR ENDDEF
+                | DECLARE name string  ENDDEF
+                | DECLARE name name string  ENDDEF
+                | definition
+                | BDOC doc EDOC
+                ;
+...
+</code></pre>
+</div><p>This defines a valid Faust program. A word in lowercase is a <em>nonterminal</em>. A word in uppercase is a <em>terminal</em>. Nonterminals can be expanded by choosing one of the options on the right hand side; terminals (“terminal” in the sense of “final”) cannot be expanded any more.</p>
+<p>To interpret the above: a Faust program starts at <code>program</code>. That gets expanded to <code>stmtlist</code> (the only option). <code>stmtlist</code> can either be expanded to the first option (an empty string), or to the second option (<code>stmtlist variantlist statment</code>). The first term there is <code>stmtlist</code> again. This is a recursive definition of <code>stmtlist</code> which means that <code>stmtlist</code> can refer to <code>variantlist statement</code> repeated any number of times. Skipping over <code>variantlist</code> (which I’ve omitted because it’s not very illuminating), <code>statement</code> can apparently be expanded in a few different ways – via some guesswork about what the various names mean, a statement can be either an import, a declaration (in two different ways), a definition, or a “doc” (in this case it’s documentation).</p>
+<p>If you read the linked file above in more detail, you’ll see all the other nonterminals (<code>name</code>, <code>string</code>, <code>definition</code>, etc.) appear on the left hand side with their own expansion options.</p>
+<h2 id="context-free-grammars-and-parser-generators" tabindex="-1">Context-free grammars and parser generators <a class="header-anchor" href="#context-free-grammars-and-parser-generators" aria-hidden="true">•</a></h2>
+<p>Language descriptions of this form, with nonterminals being expanded as strings of nonterminals and terminals, are known as <a href="https://en.wikipedia.org/wiki/Context-free_grammar">context-free grammars</a>. Many (most, even?) programming languages can be described with a context-free grammar. Context-free grammars are also studied in formal language theory, in theoretical linguistics and computer science.</p>
+<p>Context-free grammars are also very convenient for people creating their own programming languages because parser generators like yacc can be used to generate parsers for them – the parser generator consumes the context-free grammar and produces a parser for the language.</p>
+<p>That means that many programming languages will already have a context-free grammar lying around which describes them, either as part of the language’s source or as part of its specification.</p>
+<h2 id="converting-a-cfg-to-a-sublime-syntax-definition" tabindex="-1">Converting a CFG to a sublime syntax definition <a class="header-anchor" href="#converting-a-cfg-to-a-sublime-syntax-definition" aria-hidden="true">•</a></h2>
+<p>So how do I convert a context-free grammar to a <code>.sublime-syntax</code> file? I’ll illustrate the process with some progressively more complicated examples. (Though I will leave out some complicating details.)</p>
+<h3 id="1.-only-one-production-per-nonterminal" tabindex="-1">1. Only one production per nonterminal <a class="header-anchor" href="#1.-only-one-production-per-nonterminal" aria-hidden="true">•</a></h3>
+<p>First, say I have a simple context-free grammar where each nonterminal only has <em>one</em> production:</p>
+<div class="language-"><pre><code>main : a b
+     ;
+a    : 'c' 'd'
+     ;
+b    : 'e' 'f'
+     ;
+</code></pre>
+</div><p>Here <code>main</code>, <code>a</code>, and <code>b</code> are nonterminals, and <code>'c'</code>, <code>'d'</code>, <code>'e'</code>, and <code>'f'</code> are terminals. This is a very boring language whose only valid string is <code>cdef</code>. That’s because <code>main</code> expands to the string of nonterminals <code>a</code> followed by  <code>b</code>, each of <code>a</code> and <code>b</code> expands to a pair of terminals, and then expansion stops. There’s no alternate production available to choose at any stage.</p>
+<p>To render this as a <code>.sublime-syntax</code> definition, I make a context for each nonterminal and each terminal:</p>
+<div class="language-yaml"><pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">main</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> <span class="token string">''</span>
+    <span class="token key atrule">set</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>b<span class="token punctuation">,</span> a<span class="token punctuation">]</span>
+<span class="token key atrule">a</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> <span class="token string">''</span>
+    <span class="token key atrule">set</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>terminal<span class="token punctuation">-</span>d<span class="token punctuation">,</span> terminal<span class="token punctuation">-</span>c<span class="token punctuation">]</span>
+<span class="token key atrule">b</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> <span class="token string">''</span>
+    <span class="token key atrule">set</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>terminal<span class="token punctuation">-</span>f<span class="token punctuation">,</span> terminal<span class="token punctuation">-</span>e<span class="token punctuation">]</span>
+<span class="token key atrule">terminal-c</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> c
+    <span class="token key atrule">pop</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">include</span><span class="token punctuation">:</span> fail
+<span class="token key atrule">terminal-d</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> d
+    <span class="token key atrule">pop</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">include</span><span class="token punctuation">:</span> fail
+<span class="token key atrule">terminal-e</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> e
+    <span class="token key atrule">pop</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">include</span><span class="token punctuation">:</span> fail
+<span class="token key atrule">terminal-f</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> f
+    <span class="token key atrule">pop</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">include</span><span class="token punctuation">:</span> fail
+<span class="token key atrule">fail</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> \S
+    <span class="token key atrule">scope</span><span class="token punctuation">:</span> invalid.illegal
+</code></pre>
+</div><p>The <code>match: ''</code> instruction means “always match”; <code>set</code> means “pop the current context and then push the following contexts”. So when the <code>main</code> context starts, it immediately pops and is replaced by the contexts <code>b</code> and <code>a</code>. That’s in the reverse order of the production <code>main : a b</code>, so that <code>a</code> will be at the top of the stack. Then likewise the <code>a</code> context is immediately popped and replaced by <code>terminal-d</code> and <code>terminal-c</code> corresponding to the production <code>a: 'c' 'd'</code>. The <code>terminal-c</code> context will match on the literal character <code>c</code> and then pop (making <code>terminal-d</code> the top of the stack), and any other non-whitespace character will get marked as invalid (that’s what the included <code>fail</code> context does – <code>\S</code> is the regular expression for “any non-whitespace character”). After <code>c</code> is matched, and then <code>d</code> for the <code>terminal-d</code> context, <code>b</code> is at the top of the stack and is replaced by <code>[terminal-f, terminal-e]</code>, and so <code>e</code> and <code>f</code> get matched in turn.</p>
+<h3 id="2.-multiple-productions-with-different-initial-sets" tabindex="-1">2. Multiple productions with different initial sets <a class="header-anchor" href="#2.-multiple-productions-with-different-initial-sets" aria-hidden="true">•</a></h3>
+<p>A slightly more complicated example, where a nonterminal can expand to different productions:</p>
+<div class="language-diff"><pre class="language-diff"><code class="language-diff"><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> main : a b
+</span><span class="token prefix unchanged"> </span><span class="token line">      ;
+</span><span class="token prefix unchanged"> </span><span class="token line"> a    : 'c' 'd'
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">      | 'x'
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">      ;
+</span><span class="token prefix unchanged"> </span><span class="token line"> b    : 'e' 'f'
+</span><span class="token prefix unchanged"> </span><span class="token line">      ;
+</span></span></code></pre>
+</div><p>Now the nonterminal <code>a</code> can match either <code>'c'</code> followed by <code>'d'</code> <em>or</em> the terminal <code>'x'</code>. This is a more interesting language, which can match <em>two</em> strings: <code>cdef</code> and <code>xef</code>. (Okay, it’s only a <em>little</em> more interesting.)</p>
+<p>The <code>main</code> context still looks the same, and likewise <code>b</code>, because both of those nonterminals only have a single production, but I need to change the <code>a</code> context. I can do that by using a lookahead regular expression, which will match but not consume text, so that it can still be matched later:</p>
+<div class="language-yaml"><pre class="language-yaml"><code class="language-yaml"><span class="token key atrule">a</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> (<span class="token punctuation">?</span>=c)
+    <span class="token key atrule">set</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>terminal<span class="token punctuation">-</span>d<span class="token punctuation">,</span> terminal<span class="token punctuation">-</span>c<span class="token punctuation">]</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">match</span><span class="token punctuation">:</span> (<span class="token punctuation">?</span>=x)
+    <span class="token key atrule">set</span><span class="token punctuation">:</span> terminal<span class="token punctuation">-</span>x
+  <span class="token punctuation">-</span> <span class="token key atrule">include</span><span class="token punctuation">:</span> fail
+</code></pre>
+</div><p>Instead of unconditionally replacing the current context with <code>[terminal-d, terminal-c]</code>, I set the contexts corresponding to the next character. If the next character is <code>c</code> then the <code>(?=c)</code> regex matches and the context is replaced by <code>[terminal-d, terminal-c]</code>. If instead the next character is <code>x</code> then the <code>(?=x)</code> regex matches and the context is replaced by <code>terminal-x</code>. If the next character is neither <code>c</code> nor <code>x</code> then this is not a valid string in my simple language: the <code>fail</code> context will match and mark the character invalid.</p>
+<p>In this case, the productions for <code>a</code> both start with terminals, so it’s easy to see what the lookahead regex should be, but the productions could also start with nonterminals. If, for example, the language had the rule <code>main : a b | 'z' ;</code>, then I’d need to know whether to pick <code>a b</code> or <code>'z'</code>. In that case, I’d recursively compute (for each nonterminal) the set of possible terminals it could start with. The nonterminal <code>a</code> can start with a <code>'c'</code> or <code>'x'</code>, so a lookahead regex matching either of those characters should lead to picking the first production <code>a b</code>. A <code>'z'</code> should lead to picking the second production <code>'z'</code>. (I’m skipping over some details that apply when a production might match the empty string – see the <a href="https://en.wikipedia.org/wiki/LL_parser#Constructing_an_LL%281%29_parsing_table">wikipedia page on LL parsers</a> for lots more.)</p>
+<h3 id="3.-multiple-productions-with-overlapping-initial-set" tabindex="-1">3. Multiple productions with overlapping initial set <a class="header-anchor" href="#3.-multiple-productions-with-overlapping-initial-set" aria-hidden="true">•</a></h3>
+<p>The most interesting and complicated situation is where multiple productions might start with the same terminal, and so I can’t use a lookahead regular expression to decide which to choose.</p>
+<p>For example:</p>
+<div class="language-diff"><pre class="language-diff"><code class="language-diff"><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> main : a b
+</span><span class="token prefix unchanged"> </span><span class="token line">      ;
+</span><span class="token prefix unchanged"> </span><span class="token line"> a    : 'c' 'd'
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">      | 'c' 'z'
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">      | 'x'
+</span><span class="token prefix unchanged"> </span><span class="token line">      ;
+</span><span class="token prefix unchanged"> </span><span class="token line"> b    : 'e' 'f'
+</span><span class="token prefix unchanged"> </span><span class="token line">      ;
+</span></span></code></pre>
+</div><p>This is still a very simple language, with only three valid strings: <code>cdef</code>, <code>czef</code>, and <code>xef</code>. Now the context for <code>a</code> needs to change to accommodate the new production <code>'c' 'z'</code>, but unfortunately two productions now start with <code>'c'</code> and the lookahead regular expression <code>(?=c)</code> won’t distinguish between them.</p>
+<p>Before I explain how I handle this, though, I actually want to modify my approach slightly in the previous situation, and change how I handle unexpected characters:</p>
+<div class="language-diff"><pre class="language-diff"><code class="language-diff"><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> main:
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     push: [invalid, main/]
+</span><span class="token prefix inserted">+</span><span class="token line"> main/:
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - match: ''
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     set: [b, a]
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     set: [b, pop2, a]
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> a:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: (?=c)
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     set: [terminal-d, terminal-c]
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     set: [terminal-d, pop2, terminal-c]
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - match: (?=x)
+</span><span class="token prefix unchanged"> </span><span class="token line">     set: terminal-x
+</span><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span><span class="token prefix unchanged"> </span><span class="token line"> b:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: ''
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     set: [terminal-f, terminal-e]
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     set: [terminal-f, pop2, terminal-e]
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> terminal-c:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: c
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     pop: 1
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     pop: 2
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span><span class="token prefix unchanged"> </span><span class="token line"> terminal-d:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: d
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     pop: 1
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     pop: 2
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span><span class="token prefix unchanged"> </span><span class="token line"> terminal-e:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: e
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     pop: 1
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     pop: 2
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span><span class="token prefix unchanged"> </span><span class="token line"> terminal-f:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: f
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     pop: 1
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     pop: 2
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line"> invalid:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: \S
+</span><span class="token prefix inserted">+</span><span class="token line">   - scope: invalid.illegal
+</span><span class="token prefix inserted">+</span><span class="token line"> pop2:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     pop: 2
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> fail:
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">   - match: \S
+</span><span class="token prefix deleted">-</span><span class="token line">     scope: invalid.illegal
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">   - match: (?=\S)
+</span><span class="token prefix inserted">+</span><span class="token line">     pop: 1
+</span></span></code></pre>
+</div><p>Reminder: this doesn’t add the new <code>'c' 'z'</code> production yet. The changes are that (1) the symbols in each production are interleaved by the special context <code>pop2</code> which unconditionally pops two contexts off the stack, (2) that each terminal context pops two contexts off the stack when it successfully matches, and (3) when a context fails then it pops one context off the stack without consuming any text. The effect is that when parsing a valid string, pushes and pops always happen in pairs, so everything works just as before: contexts that actually do something are separated by a buffer context (the <code>pop2</code> context), and a success means popping twice. If an unexpected symbol appears, however, the <code>pop: 1</code> instruction means that the next context is a <code>pop2</code> context, which pops twice to another <code>pop2</code> context, and so on, until the entire stack has been popped, leaving only the new <code>invalid</code> context which marks everything from then on invalid.</p>
+<p>The whole point of this is accommodate <em>nondeterministic parsing</em>.</p>
+<p>Sublime Text’s syntax engine allows nondeterministic parsing. Instead of pushing or setting a context, you can <em>branch</em>: when you branch, you provide a list of contexts to try, one after another. If, during one of those contexts, there’s a <em>fail</em> action, then the syntax engine rewinds back to where it was when it branched, and tries again with the next context. The full contexts corresponding to this example are below, which changes indicated from the previous version:</p>
+<div class="language-diff"><pre class="language-diff"><code class="language-diff"><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> main:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: ''
+</span><span class="token prefix unchanged"> </span><span class="token line">     push: [invalid, main/]
+</span><span class="token prefix unchanged"> </span><span class="token line"> main/:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: ''
+</span><span class="token prefix unchanged"> </span><span class="token line">     set: [b, pop2, a]
+</span><span class="token prefix unchanged"> </span><span class="token line"> a:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: (?=c)
+</span></span><span class="token deleted-sign deleted"><span class="token prefix deleted">-</span><span class="token line">     set: [terminal-d, pop2, terminal-c]
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line">     set: a@01
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line">   - match: (?=x)
+</span><span class="token prefix unchanged"> </span><span class="token line">     set: terminal-x
+</span><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span><span class="token prefix unchanged"> </span><span class="token line"> b:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: ''
+</span><span class="token prefix unchanged"> </span><span class="token line">     set: [terminal-f, pop2, terminal-e]
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line"> a@01:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     branch_point: a@01
+</span><span class="token prefix inserted">+</span><span class="token line">     branch: [a@01@0, a@01@1]
+</span><span class="token prefix inserted">+</span><span class="token line"> a@01@0:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     set: [pop3, a@01@fail, terminal-d, pop2, terminal-c]
+</span><span class="token prefix inserted">+</span><span class="token line"> a@01@1:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     set: [pop3, pop3, terminal-z, pop2, terminal-c]
+</span><span class="token prefix inserted">+</span><span class="token line"> a@01@fail:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     fail: a@01
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> terminal-c:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: c
+</span><span class="token prefix unchanged"> </span><span class="token line">     pop: 2
+</span><span class="token prefix unchanged"> </span><span class="token line">   - include: fail
+</span><span class="token prefix unchanged"> </span><span class="token line"> # other terminals omitted for brevity: d, e, f
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line"> terminal-z:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: z
+</span><span class="token prefix inserted">+</span><span class="token line">     pop: 2
+</span><span class="token prefix inserted">+</span><span class="token line">   - include: fail
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> invalid:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: \S
+</span><span class="token prefix unchanged"> </span><span class="token line">     scope: invalid.illegal
+</span><span class="token prefix unchanged"> </span><span class="token line"> pop2:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: ''
+</span><span class="token prefix unchanged"> </span><span class="token line">     pop: 2
+</span></span><span class="token inserted-sign inserted"><span class="token prefix inserted">+</span><span class="token line"> pop3:
+</span><span class="token prefix inserted">+</span><span class="token line">   - match: ''
+</span><span class="token prefix inserted">+</span><span class="token line">     pop: 3
+</span></span><span class="token unchanged"><span class="token prefix unchanged"> </span><span class="token line"> fail:
+</span><span class="token prefix unchanged"> </span><span class="token line">   - match: (?=\S)
+</span><span class="token prefix unchanged"> </span><span class="token line">     pop: 1
+</span></span></code></pre>
+</div><p>Whenever a lookahead might match more than one production, then I create a special branch context (here, <code>a@01</code>) to try each production in sequence. The context for each production will push a pair of contexts to handle success and failure respectively, and then the contexts corresponding to the symbols for that production. The success context is <code>pop3</code>, which just pops out of the branch context (and skips over the <code>pop2</code> buffer), and the failure context triggers the special “try the next branch” action. The last try for each branch doesn’t have that special trigger (because there’s no other production to try), so it just pops out to the <code>pop2</code> so that the next failure up the stack can be triggered.</p>
+<h2 id="further-details" tabindex="-1">Further details <a class="header-anchor" href="#further-details" aria-hidden="true">•</a></h2>
+<p>And that’s essentially it! I’ve left out a few details for the sake of keeping the story relatively simple, but there are a few more tricks I use in ambiguous situations. There are some grammars that I can’t handle – for example, left-recursive grammars – and you can read a few more details about my approach <a href="https://github.com/nuchi/sublime-from-cfg">on the Github page for the project</a>. The general parsing approach is due to <a href="https://link.springer.com/content/pdf/10.1007%2FBFb0026420.pdf">Adrian Johnstone and Elizabeth Scott</a>, though adapting that approach to generating a <code>.sublime-syntax</code> file is my own work. The file format I use to represent context-free grammars is from Benjamin Schaaf’s <a href="https://github.com/BenjaminSchaaf/sbnf/">sbnf</a>, which is a very similar project to mine (though implemented entirely differently).</p>
+</div></div>
+      <div class="container"><div class="content">
+        <div id="mc_embed_signup">
+          <form action="https://haggainuchi.us18.list-manage.com/subscribe/post?u=36647dbde0c4fd6c153d670bd&amp;id=0370f283cb" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+              <div id="mc_embed_signup_scroll">
+            <label for="mce-EMAIL">Subscribe to updates</label>
+            <input type="email" value="" name="EMAIL" class="email" id="mce-EMAIL" placeholder="email address" required>
+              <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+              <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_36647dbde0c4fd6c153d670bd_0370f283cb" tabindex="-1" value=""></div>
+              <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+              </div>
+          </form>
+        </div>
+      </div></div>
+    </div>
+    
+  </body>
+</html>
